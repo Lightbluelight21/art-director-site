@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cheston Kwan — Art Director</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:  #f4eee2;        /* warm cream */
+    --ink:    #003698;        /* wordmark blue / link blue */
+    --yellow: #f0b440;        /* growing-blob accent */
+    --blue:   #1f40bb;        /* fill-screen final state */
+
+    /* Mutable colors driven by scroll. */
+    --bg:        var(--paper);
+    --chrome-fg: var(--ink);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Space Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Scroll runway: 1.5 viewport heights of scroll, with the hero pinned. */
+  .runway { position: relative; height: 150vh; }
+  .hero {
+    position: sticky; top: 0;
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    background: var(--bg);
+    transition: background-color 0.15s linear;
+  }
+
+  /* Top chrome */
+  .topbar {
+    position: fixed; inset: 0 0 auto 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 26px 36px;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--chrome-fg);
+    background-color: var(--topbar-bg, transparent);
+    z-index: 60;
+    pointer-events: none;
+  }
+  .topbar a { color: inherit; text-decoration: none; pointer-events: auto; transition: color .2s ease; }
+  .topbar a:hover { color: #f2d027; }
+
+  /* Stage hosting the yellow→blue background cells. */
+  .stage {
+    position: absolute; inset: 0;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .cell {
+    position: absolute;
+    background: var(--cell-bg, var(--yellow));
+    opacity: 0;
+    will-change: opacity;
+  }
+
+  /* Two wordmark surfaces, centered, stacked.
+     - AD is a canvas (pixel-grid rasterization).
+     - LGM is an inline SVG (smooth vector letterforms). */
+  .wordmark {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    will-change: transform;
+  }
+  #adCanvas {
+    z-index: 20;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+  }
+  #lgmSvg {
+    z-index: 25;
+    display: block;
+  }
+  #lgmSvg .glyph { opacity: 0; }
+
+  /* Scroll hint */
+  .scroll-hint {
+    position: absolute;
+    left: 50%; bottom: 32px;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--chrome-fg);
+    z-index: 30;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+  }
+  .scroll-hint.in { opacity: 0.7; }
+  .scroll-hint .line {
+    width: 1px; height: 26px; background: currentColor;
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.25; transform: scaleY(0.4); }
+    50%      { opacity: 1;    transform: scaleY(1); }
+  }
+
+  /* =================================================================
+     PORTFOLIO SECTION
+     Appears after the hero runway. 4-col grid, no gaps, like the ref.
+     ================================================================= */
+  .portfolio {
+    background: var(--blue);
+    padding-top: 0;
+    position: relative;
+    z-index: 2;
+  }
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  .tile {
+    position: relative;
+    overflow: hidden;
+    background: #0a0a0a;
+    cursor: pointer;
+    aspect-ratio: 16 / 15;
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+  .tile .media {
+    position: absolute; inset: 0;
+    background-color: #0a0a0a;
+    background-size: cover;
+    background-position: center;
+    transition: filter .35s ease;
+  }
+  /* Also remove the absolute-positioned video CSS (no longer used). */
+  .tile .media video { display: none; }
+  .tile::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    transition: opacity .35s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .tile:hover::before { opacity: 1; }
+  .tile .caption {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 24px;
+    font-family: "Roboto Mono", ui-monospace, monospace;
+    color: #fff;
+    opacity: 0;
+    transition: opacity .35s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .tile .caption .client {
+    font-family: "Roboto Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.15;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #f2d027;
+  }
+  .tile .caption .meta {
+    font-family: "Roboto Mono", ui-monospace, monospace;
+    font-weight: 400;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #fff;
+    margin-top: 10px;
+    opacity: 0.95;
+  }
+  .tile:hover .caption { opacity: 1; }
+
+  @media (max-width: 860px) {
+    .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar" id="topbar">
+  <span style="font-size: 14px; font-family: &quot;Roboto Mono&quot;, ui-monospace, monospace;">CHESTON KWAN</span>
+  <a href="about.html" style="font-size: 14px; font-family: &quot;Roboto Mono&quot;, ui-monospace, monospace;">ABOUT ME</a>
+</div>
+
+<div class="runway">
+  <div class="hero" id="hero" style="font-size: 20px; font-family: &quot;Space Mono&quot;">
+
+    <div class="stage" id="stage"></div>
+
+    <canvas class="wordmark" id="adCanvas"></canvas>
+    <svg class="wordmark" id="lgmSvg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+
+    <div class="scroll-hint" id="hint">
+      <span>Scroll</span>
+      <span class="line"></span>
+    </div>
+
+  </div>
+</div>
+
+<section class="portfolio" id="portfolio">
+  <div class="portfolio-grid" id="portfolio-grid"></div>
+</section>
+
+<script>
+// =====================================================================
+// HERO ANIMATION — INTRO + SCROLL TIMELINE
+// ---------------------------------------------------------------------
+// On page load, the "ART DIRECTOR" wordmark scatter-fades into view as
+// individual pixel rects at fixed coordinates (pure alpha ramps; no
+// motion). After the intro completes, scrolling drives a multi-phase
+// timeline:
+//
+//   s (scroll progress, 0..1)
+//   ┌──────────┬───────────┬──────────┬───────────────┐
+//   │ 0 – 0.35 │ 0.05–0.55 │ 0.50–0.66│ 0.55 – 0.95   │
+//   │ AD fades │ Yellow    │ Yellow → │ "Let's Go Make│
+//   │ letter-by│ cells grow│ blue flip│  Something"   │
+//   │ letter   │ from core │          │ letter-by-let │
+//   └──────────┴───────────┴──────────┴───────────────┘
+//
+// Both wordmarks render to their own canvases, anchored to the viewport
+// center. The yellow→blue background is a grid of DOM cells (so we get
+// the soft-pixel-perimeter halo from v7).
+// =====================================================================
+
+const PAPER     = '#f4eee2';
+const INK_RGB   = [0, 54, 152];      // deep blue
+const YELLOW    = [240, 180, 64];
+const BLUE      = [31, 64, 187];
+
+// Intro (auto, time-driven).
+const INTRO_DURATION = 1.3;          // s
+const INTRO_FADE_MIN = 0.11;
+const INTRO_FADE_MAX = 0.24;
+const NOISE_WEIGHT   = 0.82;
+const NOISE_CLUMPS   = 3.5;
+
+// Scroll timeline windows.
+const AD_FADE_OUT_RANGE     = [0.00, 0.35];   // scroll s where letters fade out
+const LGM_FADE_IN_RANGE     = [0.45, 0.78];   // scroll s where letters fade in
+const COLOR_FLIP_WINDOW     = [0.42, 0.60];   // yellow → blue
+const BG_FILL_WINDOW        = [0.52, 0.66];   // page bg paper → blue
+const CHROME_FLIP_WINDOW    = [0.55, 0.68];   // chrome ink → paper
+const HINT_IN               = [0.00, 0.04];
+const RUNWAY_VH             = 1.5;            // height of .runway in viewport heights
+
+// Wordmark layout.
+const GRID_W_AD  = 115;              // sampling resolution across AD width
+
+const adCanvas   = document.getElementById('adCanvas');
+const lgmSvg     = document.getElementById('lgmSvg');
+const adCtx      = adCanvas.getContext('2d');
+const stage      = document.getElementById('stage');
+const topbar     = document.getElementById('topbar');
+const hint       = document.getElementById('hint');
+const heroEl     = document.getElementById('hero');
+
+// AD: pixel-rasterized wordmark state.
+const AD  = { pixels: [], letters: [], srcW: 1, srcH: 1, cellSize: 1, canvas: adCanvas, ctx: adCtx, rgb: INK_RGB, scale: 1 };
+// LGM: vector glyphs. `groups` are the per-letter <g> elements whose
+// opacity is driven directly by the scroll timeline.
+const LGM = { groups: [], letters: [] };
+
+let cellDefs = [];     // background yellow→blue cells
+let CELL, COLS, ROWS, HALF_COLS, HALF_ROWS;
+let coreKF = [];
+
+let introStart = 0;
+let introDone = false;
+
+// =====================================================================
+// SHARED HELPERS
+// =====================================================================
+function lerp(a, b, t) { return a + (b - a) * t; }
+function smoothstep(a, b, x) {
+  const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+}
+
+function hash2(ix, iy) {
+  let h = ix * 374761393 + iy * 668265263;
+  h = (h ^ (h >> 13)) * 1274126177;
+  h = h ^ (h >> 16);
+  return ((h >>> 0) % 100000) / 100000;
+}
+function smooth(t) { return t * t * (3 - 2 * t); }
+function valueNoise(x, y) {
+  const ix = Math.floor(x), iy = Math.floor(y);
+  const fx = x - ix,        fy = y - iy;
+  const a = hash2(ix,     iy);
+  const b = hash2(ix + 1, iy);
+  const c = hash2(ix,     iy + 1);
+  const d = hash2(ix + 1, iy + 1);
+  const ux = smooth(fx), uy = smooth(fy);
+  return (a * (1 - ux) + b * ux) * (1 - uy)
+       + (c * (1 - ux) + d * ux) * uy;
+}
+
+// =====================================================================
+// WORDMARK LOADER (per-path rasterization + re-kerning)
+// ---------------------------------------------------------------------
+// Each <path> in the source SVG is one glyph. We rasterize each on its
+// own offscreen canvas so adjacent glyphs never merge. Then re-kern by
+// enforcing a minimum cell gap between glyphs.
+// =====================================================================
+function loadSvgImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload  = () => resolve(img);
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+async function loadWordmark(state, url, opts) {
+  const { gridW, letterMinGap, wordMinGap, introWindow = true } = opts;
+
+  // Pull viewBox so we know source dimensions for the canvas.
+  const res = await fetch(url);
+  const txt = await res.text();
+  const doc = new DOMParser().parseFromString(txt, 'image/svg+xml');
+  const svg = doc.querySelector('svg');
+  let srcW = 1, srcH = 1;
+  const vb = svg && svg.getAttribute('viewBox');
+  if (vb) {
+    const parts = vb.split(/\s+/).map(Number);
+    srcW = parts[2];
+    srcH = parts[3];
+  }
+  const paths = Array.from(svg.querySelectorAll('path'));
+
+  const cellSize = srcW / gridW;
+  const gridCols = gridW;
+  const gridRows = Math.max(1, Math.round(srcH / cellSize));
+
+  // Rasterize a single path.
+  async function rasterize(d) {
+    const svgText = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${srcW} ${srcH}"><path d="${d}" fill="#000"/></svg>`;
+    const blob = new Blob([svgText], { type: 'image/svg+xml' });
+    const objUrl = URL.createObjectURL(blob);
+    const img = await loadSvgImage(objUrl);
+    const off = document.createElement('canvas');
+    off.width = gridCols; off.height = gridRows;
+    const octx = off.getContext('2d', { willReadFrequently: true });
+    octx.imageSmoothingEnabled = true;
+    octx.drawImage(img, 0, 0, gridCols, gridRows);
+    const data = octx.getImageData(0, 0, gridCols, gridRows).data;
+    URL.revokeObjectURL(objUrl);
+    const cells = [];
+    let minGX = gridCols, maxGX = -1, minGY = gridRows, maxGY = -1;
+    for (let gy = 0; gy < gridRows; gy++) {
+      for (let gx = 0; gx < gridCols; gx++) {
+        const i = (gy * gridCols + gx) * 4;
+        if (data[i + 3] < 80) continue;
+        cells.push({ gx, gy });
+        if (gx < minGX) minGX = gx;
+        if (gx > maxGX) maxGX = gx;
+        if (gy < minGY) minGY = gy;
+        if (gy > maxGY) maxGY = gy;
+      }
+    }
+    return { cells, minGX, maxGX, minGY, maxGY };
+  }
+
+  const glyphs = [];
+  for (const p of paths) {
+    const d = p.getAttribute('d');
+    if (!d) continue;
+    const g = await rasterize(d);
+    if (g.cells.length) glyphs.push(g);
+  }
+  glyphs.sort((a, b) => a.minGX - b.minGX);
+
+  // Re-kern: enforce minimum letter and word gaps.
+  const origGaps = [];
+  for (let i = 1; i < glyphs.length; i++) origGaps.push(glyphs[i].minGX - glyphs[i - 1].maxGX - 1);
+  const sortedG = [...origGaps].sort((a, b) => a - b);
+  const medianGap = sortedG[Math.floor(sortedG.length / 2)] || 1;
+  const WORD_GAP_THRESHOLD = medianGap * 2.0;
+
+  const newMinGX = new Array(glyphs.length);
+  newMinGX[0] = glyphs[0].minGX;
+  for (let i = 1; i < glyphs.length; i++) {
+    const origGap = origGaps[i - 1];
+    const isWord = origGap >= WORD_GAP_THRESHOLD;
+    const target = isWord ? wordMinGap : letterMinGap;
+    const finalGap = Math.max(origGap, target);
+    const prevWidth = glyphs[i - 1].maxGX - glyphs[i - 1].minGX;
+    newMinGX[i] = newMinGX[i - 1] + prevWidth + 1 + finalGap;
+  }
+
+  // Per-letter scroll fade timings. AD letters fade OUT; LGM letters fade IN.
+  // Random order, but slightly biased so the ends finish before/after center
+  // for a wave-y feel.
+  const N = glyphs.length;
+  const letterTimes = Array.from({ length: N }, (_, i) => Math.random());
+
+  // Emit pixels with letter index and timings.
+  const NOISE_FREQ = NOISE_CLUMPS / srcW;
+  const out = [];
+  let minPxX = Infinity, maxPxX = -Infinity, minPxY = Infinity, maxPxY = -Infinity;
+  for (let gi = 0; gi < glyphs.length; gi++) {
+    const g = glyphs[gi];
+    const dx = newMinGX[gi] - g.minGX;
+    for (const { gx, gy } of g.cells) {
+      const newGX = gx + dx;
+      const x = newGX * cellSize;
+      const y = gy * cellSize;
+      if (x < minPxX) minPxX = x;
+      if (x + cellSize > maxPxX) maxPxX = x + cellSize;
+      if (y < minPxY) minPxY = y;
+      if (y + cellSize > maxPxY) maxPxY = y + cellSize;
+
+      const n = valueNoise(x * NOISE_FREQ, y * NOISE_FREQ);
+      const r1 = Math.random();
+      const threshold = NOISE_WEIGHT * n + (1 - NOISE_WEIGHT) * r1;
+      const appearAt  = threshold * INTRO_DURATION * 0.80;
+      const fadeDur   = INTRO_FADE_MIN + Math.random() * (INTRO_FADE_MAX - INTRO_FADE_MIN);
+      out.push({ x, y, w: cellSize, h: cellSize, appearAt, fadeDur, letter: gi });
+    }
+  }
+  // Normalize to (0,0).
+  for (const p of out) { p.x -= minPxX; p.y -= minPxY; }
+
+  state.pixels   = out;
+  state.letters  = letterTimes;
+  state.srcW     = maxPxX - minPxX;
+  state.srcH     = maxPxY - minPxY;
+  state.cellSize = cellSize;
+  state.glyphCount = glyphs.length;
+}
+
+// =====================================================================
+// LGM SVG WORDMARK (smooth vector — one <g> per letter)
+// ---------------------------------------------------------------------
+// Renders "Let's Go Make Something" as live SVG paths grouped by letter.
+// Each <g class="glyph"> wraps one source <path> and gets a translation
+// applied so neighboring letters have at least LGM_LETTER_MIN_GAP units
+// of clear space (LGM_WORD_MIN_GAP between words). Per-letter scroll
+// fade-in is applied by setting `style.opacity` on each <g>.
+// =====================================================================
+const LGM_WORD_MIN_GAP = 30;     // source units: minimum clear space between words
+const LGM_FILL         = '#f4eee2';  // cream, matches paper
+
+async function loadLGM() {
+  const url = 'images/lets_go_make_something.svg';
+  const res = await fetch(url);
+  const txt = await res.text();
+  const doc = new DOMParser().parseFromString(txt, 'image/svg+xml');
+  const src = doc.querySelector('svg');
+  let srcW = 1, srcH = 1;
+  const vb = src && src.getAttribute('viewBox');
+  if (vb) {
+    const parts = vb.split(/\s+/).map(Number);
+    srcW = parts[2];
+    srcH = parts[3];
+  }
+  const paths = Array.from(src.querySelectorAll('path'));
+
+  // To call getBBox we need the paths inside a *rendered* SVG in the
+  // document. We'll temporarily attach a hidden measurement SVG that
+  // mirrors the source's viewBox.
+  const NS = 'http://www.w3.org/2000/svg';
+  const meas = document.createElementNS(NS, 'svg');
+  meas.setAttribute('viewBox', `0 0 ${srcW} ${srcH}`);
+  meas.style.position = 'absolute';
+  meas.style.visibility = 'hidden';
+  meas.style.pointerEvents = 'none';
+  meas.style.width  = srcW + 'px';
+  meas.style.height = srcH + 'px';
+  meas.style.left = '-99999px';
+  meas.style.top  = '0';
+  document.body.appendChild(meas);
+
+  const glyphs = paths.map(p => {
+    const d = p.getAttribute('d');
+    const node = document.createElementNS(NS, 'path');
+    node.setAttribute('d', d);
+    meas.appendChild(node);
+    const bb = node.getBBox();
+    return { d, x: bb.x, y: bb.y, w: bb.width, h: bb.height };
+  });
+  meas.remove();
+
+  glyphs.sort((a, b) => (a.x + a.w / 2) - (b.x + b.w / 2));
+
+  // Identify "marks" — small glyphs that sit high (apostrophe, dot of i,
+  // etc). They don't consume horizontal space; they overlay the letter
+  // they belong to.
+  const allY = glyphs.map(g => g.y);
+  const minYAll = Math.min(...allY);
+  const maxYAll = Math.max(...glyphs.map(g => g.y + g.h));
+  const heightAll = maxYAll - minYAll;
+  const isMark = glyphs.map(g => g.w < 30 && g.h < heightAll * 0.5);
+
+  // Re-kern. For letters inside the same word, preserve the SVG's
+  // original designed gap exactly (italic spacing is intentional).
+  // Only enforce a minimum on word boundaries. Mark glyphs are placed
+  // at their original offset relative to the previous non-mark glyph and
+  // never advance the cursor.
+  const origGapsAll = [];
+  for (let i = 1; i < glyphs.length; i++) {
+    origGapsAll.push(glyphs[i].x - (glyphs[i - 1].x + glyphs[i - 1].w));
+  }
+  const WORD_GAP_THRESHOLD = 25;  // absolute (source units) — italic letter gaps can be negative, so a relative threshold breaks
+
+  const newX = new Array(glyphs.length);
+  let prevNonMark = -1;
+  for (let i = 0; i < glyphs.length; i++) {
+    const g = glyphs[i];
+    if (isMark[i]) {
+      if (prevNonMark < 0) {
+        newX[i] = g.x;
+      } else {
+        const deltaFromPrev = g.x - glyphs[prevNonMark].x;
+        newX[i] = newX[prevNonMark] + deltaFromPrev;
+      }
+      continue;
+    }
+    if (prevNonMark < 0) {
+      newX[i] = g.x;
+    } else {
+      const prev = glyphs[prevNonMark];
+      const origGap = g.x - (prev.x + prev.w);
+      const isWord = origGap >= WORD_GAP_THRESHOLD;
+      const finalGap = isWord ? Math.max(origGap, LGM_WORD_MIN_GAP) : origGap;
+      newX[i] = newX[prevNonMark] + prev.w + finalGap;
+    }
+    prevNonMark = i;
+  }
+
+  // Build final SVG: tight viewBox around all letters, each path inside
+  // its own <g> translated to its new x-offset.
+  const minX = newX[0];
+  const maxX = newX[newX.length - 1] + glyphs[glyphs.length - 1].w;
+  const minY = Math.min(...glyphs.map(g => g.y));
+  const maxY = Math.max(...glyphs.map(g => g.y + g.h));
+  const vbW = maxX - minX;
+  const vbH = maxY - minY;
+
+  lgmSvg.setAttribute('viewBox', `${minX} ${minY} ${vbW} ${vbH}`);
+  lgmSvg.innerHTML = '';
+
+  const groups = [];
+  for (let i = 0; i < glyphs.length; i++) {
+    const g  = glyphs[i];
+    const dx = newX[i] - g.x;
+    const grp = document.createElementNS(NS, 'g');
+    grp.setAttribute('class', 'glyph');
+    grp.setAttribute('transform', `translate(${dx}, 0)`);
+    grp.setAttribute('fill', LGM_FILL);
+    const path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', g.d);
+    grp.appendChild(path);
+    lgmSvg.appendChild(grp);
+    groups.push(grp);
+  }
+
+  LGM.groups  = groups;
+  LGM.letters = Array.from({ length: groups.length }, () => Math.random());
+  LGM.srcW    = vbW;
+  LGM.srcH    = vbH;
+}
+
+function fitLGM(vwFraction, vhFraction) {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const maxW = vw * vwFraction;
+  const maxH = vh * vhFraction;
+  const scale = Math.min(maxW / LGM.srcW, maxH / LGM.srcH);
+  lgmSvg.style.width  = Math.round(LGM.srcW * scale) + 'px';
+  lgmSvg.style.height = Math.round(LGM.srcH * scale) + 'px';
+}
+
+// =====================================================================
+// AD CANVAS SIZING
+// =====================================================================
+function fitCanvas(state, vwFraction, vhFraction) {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const maxW = vw * vwFraction;
+  const maxH = vh * vhFraction;
+  state.scale = Math.min(maxW / state.srcW, maxH / state.srcH);
+  const cssW = Math.round(state.srcW * state.scale);
+  const cssH = Math.round(state.srcH * state.scale);
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  state.canvas.style.width  = cssW + 'px';
+  state.canvas.style.height = cssH + 'px';
+  state.canvas.width  = Math.round(cssW * dpr);
+  state.canvas.height = Math.round(cssH * dpr);
+  state.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  state.ctx.imageSmoothingEnabled = false;
+}
+
+// =====================================================================
+// BACKGROUND YELLOW → BLUE GRID
+// =====================================================================
+// Tile the viewport. Each cell has its own appearance + ramp. Cells are
+// placed in even cell-units around the screen center so growth radiates
+// from the middle (matching the storyboards).
+function makeCoreKF() {
+  return [
+    { s: 0.05, w: 0,                       h: 0 },
+    { s: 0.10, w: 3,                       h: 1 },
+    { s: 0.18, w: 5,                       h: 2 },
+    { s: 0.26, w: 7,                       h: 2 },
+    { s: 0.34, w: 9,                       h: 3 },
+    { s: 0.42, w: 13,                      h: 5 },
+    { s: 0.50, w: 18,                      h: 7 },
+    { s: 0.58, w: COLS + 4,                h: ROWS + 4 },
+  ];
+}
+function inverseSize(target, axis) {
+  if (target <= coreKF[0][axis]) return coreKF[0].s;
+  for (let i = 0; i < coreKF.length - 1; i++) {
+    const a = coreKF[i][axis], b = coreKF[i + 1][axis];
+    if (a <= target && target <= b) {
+      if (a === b) return coreKF[i].s;
+      const t = (target - a) / (b - a);
+      return coreKF[i].s + t * (coreKF[i + 1].s - coreKF[i].s);
+    }
+  }
+  return coreKF[coreKF.length - 1].s;
+}
+function reachThreshold(gx, gy) {
+  const sW = inverseSize(2 * Math.abs(gx), 'w');
+  const sH = inverseSize(2 * Math.abs(gy), 'h');
+  return Math.max(sW, sH);
+}
+
+function buildCells() {
+  CELL = Math.max(72, Math.min(140, Math.round(window.innerWidth / 16)));
+  COLS = Math.ceil(window.innerWidth  / CELL) + 1;
+  ROWS = Math.ceil(window.innerHeight / CELL) + 1;
+  coreKF = makeCoreKF();
+  HALF_COLS = Math.ceil(window.innerWidth  / CELL / 2) + 1;
+  HALF_ROWS = Math.ceil(window.innerHeight / CELL / 2) + 1;
+
+  stage.innerHTML = '';
+  cellDefs = [];
+
+  const cx = window.innerWidth  / 2;
+  const cy = window.innerHeight / 2;
+
+  for (let gx = -HALF_COLS; gx <= HALF_COLS; gx++) {
+    for (let gy = -HALF_ROWS; gy <= HALF_ROWS; gy++) {
+      const reachT = Math.max(0.05, Math.min(1, reachThreshold(gx, gy)));
+
+      // Anticipation: some cells pop in early at low opacity for halo.
+      const anticipates = Math.random() < 0.55;
+      const anticipation = anticipates ? 0.04 + Math.random() * 0.18 : 0.02;
+      const appearT = Math.max(0.05, reachT - anticipation);
+
+      const initialOp = 0.16 + Math.random() * 0.16;
+      const rampDur   = 0.05 + Math.random() * 0.10;
+      const peak      = 0.92 + Math.random() * 0.08;
+
+      const px = Math.round(cx + gx * CELL - CELL / 2);
+      const py = Math.round(cy + gy * CELL - CELL / 2);
+
+      const el = document.createElement('div');
+      el.className = 'cell';
+      el.style.left   = px + 'px';
+      el.style.top    = py + 'px';
+      el.style.width  = CELL + 'px';
+      el.style.height = CELL + 'px';
+      stage.appendChild(el);
+      cellDefs.push({ el, appearT, reachT, initialOp, rampDur, peak, prevOp: 0 });
+    }
+  }
+}
+
+function cellColor(s) {
+  const t = smoothstep(COLOR_FLIP_WINDOW[0], COLOR_FLIP_WINDOW[1], s);
+  return [
+    Math.round(lerp(YELLOW[0], BLUE[0], t)),
+    Math.round(lerp(YELLOW[1], BLUE[1], t)),
+    Math.round(lerp(YELLOW[2], BLUE[2], t)),
+  ];
+}
+
+// =====================================================================
+// AD WORDMARK RENDER (canvas)
+// ---------------------------------------------------------------------
+// For each pixel:
+//   alphaIntro  = intro fade-in alpha at time `elapsedSec`
+//   alphaLetter = scroll-driven per-letter multiplier (1→0 fade out)
+// =====================================================================
+function renderAD(elapsedSec, scrollProgress) {
+  const ctx = AD.ctx;
+  const canvas = AD.canvas;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const [r, g, b] = AD.rgb;
+  const letters = AD.letters;
+  const N = letters.length;
+
+  // Per-letter fade-out multipliers.
+  const letterMul = new Float32Array(N);
+  const [s0, s1] = AD_FADE_OUT_RANGE;
+  const span = s1 - s0;
+  for (let i = 0; i < N; i++) {
+    const t = letters[i];
+    const start = s0 + t * (span * 0.75);
+    const end   = start + span * 0.18;
+    letterMul[i] = 1 - smoothstep(start, end, scrollProgress);
+  }
+
+  for (let i = 0; i < AD.pixels.length; i++) {
+    const p = AD.pixels[i];
+    let intro;
+    if (elapsedSec < p.appearAt) intro = 0;
+    else {
+      const k = (elapsedSec - p.appearAt) / p.fadeDur;
+      intro = k >= 1 ? 1 : k;
+    }
+    const a = intro * letterMul[p.letter];
+    if (a <= 0.003) continue;
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
+    ctx.fillRect(p.x * AD.scale, p.y * AD.scale, p.w * AD.scale, p.h * AD.scale);
+  }
+}
+
+// =====================================================================
+// LGM WORDMARK RENDER (svg per-letter opacity)
+// =====================================================================
+function renderLGM(scrollProgress) {
+  const groups = LGM.groups;
+  const letters = LGM.letters;
+  const N = groups.length;
+  if (!N) return;
+  const [s0, s1] = LGM_FADE_IN_RANGE;
+  const span = s1 - s0;
+  for (let i = 0; i < N; i++) {
+    const t = letters[i];
+    const start = s0 + t * (span * 0.65);
+    const end   = start + span * 0.20;
+    const op = smoothstep(start, end, scrollProgress);
+    groups[i].style.opacity = op.toFixed(3);
+  }
+}
+
+// =====================================================================
+// SCROLL UPDATE
+// =====================================================================
+let lastScrollS = -1;
+function getScrollS() {
+  const max = window.innerHeight * (RUNWAY_VH - 1);
+  return Math.min(1, Math.max(0, window.scrollY / max));
+}
+
+function update(elapsedSec) {
+  const s = getScrollS();
+
+  // ----- Background cells -----
+  const [r, g, b] = cellColor(s);
+  document.documentElement.style.setProperty('--cell-bg', `rgb(${r}, ${g}, ${b})`);
+  // Apply to live elements (custom property already used by cells, but
+  // setting via document doesn't propagate to position:absolute children
+  // in all browsers — set on heroEl too).
+  heroEl.style.setProperty('--cell-bg', `rgb(${r}, ${g}, ${b})`);
+
+  for (let i = 0; i < cellDefs.length; i++) {
+    const d = cellDefs[i];
+    let op;
+    if (s < d.appearT) op = 0;
+    else if (s < d.reachT) op = d.initialOp;
+    else {
+      const k = Math.min(1, (s - d.reachT) / d.rampDur);
+      op = d.initialOp + (d.peak - d.initialOp) * k;
+    }
+    if (Math.abs(op - d.prevOp) > 0.004) {
+      d.el.style.opacity = op.toFixed(3);
+      d.prevOp = op;
+    }
+  }
+
+  // ----- Page background flip (paper → blue) -----
+  // Once cells dominate the screen we tip the page bg to blue so any gaps
+  // disappear into the final state.
+  const bgT = smoothstep(BG_FILL_WINDOW[0], BG_FILL_WINDOW[1], s);
+  const bgR = Math.round(lerp(244, BLUE[0], bgT));
+  const bgG = Math.round(lerp(238, BLUE[1], bgT));
+  const bgB = Math.round(lerp(226, BLUE[2], bgT));
+  document.documentElement.style.setProperty('--bg', `rgb(${bgR}, ${bgG}, ${bgB})`);
+  heroEl.style.backgroundColor = `rgb(${bgR}, ${bgG}, ${bgB})`;
+
+  // ----- Chrome ink → paper -----
+  const cT = smoothstep(CHROME_FLIP_WINDOW[0], CHROME_FLIP_WINDOW[1], s);
+  const cR = Math.round(lerp(INK_RGB[0], 244, cT));
+  const cG = Math.round(lerp(INK_RGB[1], 238, cT));
+  const cB = Math.round(lerp(INK_RGB[2], 226, cT));
+  topbar.style.color = `rgb(${cR}, ${cG}, ${cB})`;
+  hint.style.color   = `rgb(${cR}, ${cG}, ${cB})`;
+
+  // ----- Topbar background fill (transparent → blue) -----
+  // Once the hero bg is fully blue, the fixed topbar needs its own
+  // blue fill so it stays visible above the portfolio section below.
+  const tbT = smoothstep(0.62, 0.78, s);
+  if (tbT <= 0.001) {
+    topbar.style.backgroundColor = 'transparent';
+  } else {
+    topbar.style.backgroundColor = `rgba(${BLUE[0]}, ${BLUE[1]}, ${BLUE[2]}, ${tbT.toFixed(3)})`;
+  }
+
+  // Scroll hint fades when scrolling has begun.
+  if (s > HINT_IN[1]) hint.classList.remove('in');
+
+  // ----- Wordmarks -----
+  if (AD.pixels.length) renderAD(elapsedSec, s);
+  renderLGM(s);
+
+  lastScrollS = s;
+}
+
+// =====================================================================
+// ANIMATION LOOP
+// =====================================================================
+let rafId = 0;
+function tick(now) {
+  if (!introStart) introStart = now;
+  const elapsed = (now - introStart) / 1000;
+
+  // Intro is "done" after the slowest pixel finishes its ramp.
+  const introWindow = INTRO_DURATION * 0.80 + INTRO_FADE_MAX + 0.05;
+  if (!introDone && elapsed >= introWindow) {
+    introDone = true;
+    hint.classList.add('in');
+  }
+
+  update(Math.min(elapsed, introWindow));
+  rafId = requestAnimationFrame(tick);
+}
+
+// =====================================================================
+// BOOT
+// =====================================================================
+let resizeT;
+function onResize() {
+  clearTimeout(resizeT);
+  resizeT = setTimeout(() => {
+    if (AD.pixels.length) fitCanvas(AD, 0.82, 0.40);
+    if (LGM.groups.length) fitLGM(0.90, 0.18);
+    buildCells();
+    lastScrollS = -1;
+  }, 120);
+}
+
+(async function init() {
+  await Promise.all([
+    loadWordmark(AD,  'images/art_director_caps_outlined.svg', { gridW: GRID_W_AD, letterMinGap: 2, wordMinGap: 9 }),
+    loadLGM(),
+  ]);
+  fitCanvas(AD,  0.82, 0.40);
+  fitLGM(0.90, 0.18);
+  buildCells();
+
+  window.addEventListener('resize', onResize);
+  window.addEventListener('scroll', () => { /* tick handles render */ }, { passive: true });
+
+  rafId = requestAnimationFrame(tick);
+})();
+</script>
+
+<!-- =====================================================================
+     PORTFOLIO GRID — renders thumbnails into the section below the hero.
+     ===================================================================== -->
+<script>
+const PROJECTS = [
+  { n: "01", client: "BLADE RUNNER 2049",     title: "",                 type: "Film" },
+  { n: "02", client: "ALIEN",                 title: "RICK & MORTY",     type: "Brand x IP" },
+  { n: "03", client: "TACO BELL",             title: "SUPERBOWL",        type: "Campaign" },
+  { n: "04", client: "DR PEPPER",             title: "",                 type: "Commercial" },
+  { n: "05", client: "HONDA",                 title: "",                 type: "Commercial" },
+  { n: "06", client: "DIRECTV",               title: "",                 type: "Campaign" },
+  { n: "07", client: "ALIEN",                 title: "AUDI",             type: "Brand x IP" },
+  { n: "08", client: "BEHR",                  title: "",                 type: "Commercial" },
+  { n: "09", client: "ADIDAS",                title: "",                 type: "Commercial" },
+  { n: "10", client: "McDONALD\u2019S",       title: "",                 type: "Commercial" },
+  { n: "11", client: "TACO BELL",             title: "SECRET PRODUCT",   type: "Campaign" },
+  { n: "12", client: "TACO BELL",             title: "COMMERCIALS",      type: "Commercial" },
+  { n: "13", client: "FARMERS INSURANCE",     title: "COMMERCIALS",      type: "Commercial" },
+  { n: "14", client: "TACO BELL",             title: "TWITCH",           type: "Brand x Platform" },
+  { n: "15", client: "FARMERS INSURANCE",     title: "DIGITAL SHORTS",   type: "Digital" },
+  { n: "16", client: "JACK IN THE BOX",       title: "",                 type: "Commercial" },
+  { n: "17", client: "EXPERIAN",              title: "",                 type: "Commercial" },
+  { n: "18", client: "LOWE\u2019S",           title: "",                 type: "Commercial" },
+  { n: "19", client: "ALIEN",                 title: "GOPRO",            type: "Brand x IP" }
+];
+const GIF_OVERRIDES = { "07": "gifs/07-v2.gif", "19": "gifs/19-v2.gif" };
+PROJECTS.forEach(p => { p.gif = GIF_OVERRIDES[p.n] || `gifs/${p.n}.gif`; });
+
+function tile(p) {
+  const subhead = p.title ? `<div class="meta">${p.title}</div>` : "";
+  // Lazy-loaded GIF: keeps initial page light. The IntersectionObserver
+  // below assigns background-image only when the tile is near the viewport.
+  return `
+    <a class="tile" href="projects/case.html?n=${p.n}">
+      <div class="media" data-src="${p.gif}"></div>
+      <div class="caption">
+        <div class="client">${p.client}</div>
+        ${subhead}
+      </div>
+    </a>`;
+}
+document.getElementById("portfolio-grid").innerHTML = PROJECTS.map(tile).join("");
+
+// Lazy-load GIF thumbnails as they approach the viewport.
+const lazyObserver = new IntersectionObserver((entries, obs) => {
+  for (const entry of entries) {
+    if (!entry.isIntersecting) continue;
+    const el = entry.target;
+    const src = el.dataset.src;
+    if (src) {
+      el.style.backgroundImage = `url('${src}')`;
+      el.removeAttribute('data-src');
+    }
+    obs.unobserve(el);
+  }
+}, { rootMargin: '600px 0px' });
+document.querySelectorAll('.portfolio-grid .media[data-src]').forEach(el => lazyObserver.observe(el));
+</script>
+
+</body>
+</html>

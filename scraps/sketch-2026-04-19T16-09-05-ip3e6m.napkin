@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "created": "2026-04-19T16:09:05.683Z",
+  "modified": "2026-04-19T16:11:24.756Z",
+  "objects": [
+    {
+      "id": "crkwqs54l",
+      "type": "text",
+      "x": 411,
+      "y": 286,
+      "data": {
+        "content": "CHESTON KWAN",
+        "fontSize": 16,
+        "color": "#8B2500",
+        "bold": false
+      },
+      "width": 126,
+      "height": 21
+    },
+    {
+      "id": "hsvcekji9",
+      "type": "rect",
+      "x": 180,
+      "y": 151,
+      "width": 579,
+      "height": 177,
+      "data": {
+        "fill": null,
+        "stroke": "#8B2500",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "id": "gub3lbrov",
+      "type": "rect",
+      "x": 153,
+      "y": 137,
+      "width": 671,
+      "height": 588,
+      "data": {
+        "fill": null,
+        "stroke": "#8B2500",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "id": "rgpwfi4nw",
+      "type": "rect",
+      "x": 176,
+      "y": 347,
+      "width": 155,
+      "height": 132,
+      "data": {
+        "fill": null,
+        "stroke": "#8B2500",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "id": "64bbvtua2",
+      "type": "rect",
+      "x": 343,
+      "y": 345,
+      "width": 159,
+      "height": 136,
+      "data": {
+        "fill": null,
+        "stroke": "#8B2500",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "id": "yxkhu4x7u",
+      "type": "rect",
+      "x": 509,
+      "y": 339,
+      "width": 144,
+      "height": 143,
+      "data": {
+        "fill": null,
+        "stroke": "#8B2500",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "id": "wg9tyzelg",
+      "type": "rect",
+      "x": 661,
+      "y": 338,
+      "width": 144,
+      "height": 152,
+      "data": {
+        "fill": null,
+        "stroke": "#8B2500",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "id": "uyxesbdlx",
+      "type": "rect",
+      "x": 183,
+      "y": 490,
+      "width": 147,
+      "height": 175,
+      "data": {
+        "fill": null,
+        "stroke": "#8B2500",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "id": "03ixkasbt",
+      "type": "rect",
+      "x": 343,
+      "y": 495,
+      "width": 149,
+      "height": 167,
+      "data": {
+        "fill": null,
+        "stroke": "#8B2500",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "id": "sru86nuam",
+      "type": "rect",
+      "x": 510,
+      "y": 496,
+      "width": 161,
+      "height": 172,
+      "data": {
+        "fill": null,
+        "stroke": "#8B2500",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "id": "8a36pi93y",
+      "type": "rect",
+      "x": 688,
+      "y": 501,
+      "width": 135,
+      "height": 177,
+      "data": {
+        "fill": null,
+        "stroke": "#8B2500",
+        "strokeWidth": 2
+      }
+    }
+  ]
+}

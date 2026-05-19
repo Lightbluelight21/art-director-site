@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cheston Kwan — About</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Zalando+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #f2d027;          /* yellow */
+    --paper: #000;
+    --hand: "DM Sans", system-ui, sans-serif;
+    --title: "Zalando Sans", system-ui, sans-serif;
+    --mono: "Roboto Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); min-height: 100vh; }
+  body { font-family: var(--hand); }
+
+  /* Top strip mirrors the portfolio header */
+  .strip {
+    border-top: 1.5px solid #000;
+    border-bottom: 1.5px solid #000;
+    background: #000;
+    overflow: hidden;
+  }
+  .marquee {
+    display: flex; gap: 48px;
+    animation: marquee 28s linear infinite;
+    white-space: nowrap;
+    padding: 10px 0;
+  }
+  .marquee .item {
+    font-family: "Roboto Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: 85px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1.1;
+    color: var(--ink);
+    display: inline-flex; align-items: center; gap: 32px;
+  }
+  .marquee .item .bolt { width: 36px; height: 36px; color: var(--ink); }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  .sub {
+    padding: 14px 24px;
+    display: flex; justify-content: space-between; align-items: center; font-family: var(--mono);
+    font-size: 24px; letter-spacing: 0.14em; text-transform: uppercase; color: #fff;
+    border-bottom: 1.5px dashed rgba(242, 208, 39, 0.35);
+  }
+  .sub a { color: #fff; text-decoration: none; transition: color .2s ease; }
+  .sub a:hover { color: var(--ink); }
+  .sub .left { flex: 0 0 auto; text-align: left; margin-right: auto; }
+  .sub .right { flex: 0 0 auto; text-align: right; margin-left: auto; }
+
+  /* ---------- About hero: headline left, portrait right ---------- */
+  .about-hero {
+    position: relative;
+    padding: 48px 32px 24px;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  .about-hero .portrait-col {
+    position: absolute;
+    top: 48px;
+    left: 260px;
+    width: 310px;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: #000;
+    z-index: 1;
+  }
+  .about-hero .portrait-col .img {
+    position: absolute;
+    inset: 0;
+    background-image: url('images/cheston-bw.png');
+    background-size: cover;
+    background-position: center 25%;
+  }
+  .about-hero .headline {
+    position: relative;
+    z-index: 2;
+    padding-top: 280px; /* push headline below the top of the image so they overlap */
+    pointer-events: none;
+  }
+  .about-hero .headline h1 {
+    font-family: "Roboto Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: clamp(56px, 8vw, 104px);
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    color: #f2d027;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  /* About body */
+  .about {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 24px 32px 120px;
+    color: var(--ink);
+    position: relative;
+    z-index: 2;
+  }
+  .kicker {
+    font-family: var(--mono); font-size: 13px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: #fff; margin-bottom: 24px;
+  }
+
+  @media (max-width: 860px) {
+    .about-hero { padding: 32px 24px 24px; }
+    .about-hero .portrait-col {
+      position: relative; top: auto; left: auto;
+      width: 42%; height: auto; aspect-ratio: 3 / 4;
+      float: left; margin: 8px 20px 12px 0;
+    }
+    .about-hero .headline { padding-top: 0; }
+    .about-hero .headline h1 { font-size: clamp(40px, 11vw, 72px); margin: 0; }
+    .about-hero::after { content: ""; display: block; clear: both; }
+  }
+  h1 {
+    font-family: var(--title); font-weight: 700;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 1.02; margin: 0 0 48px;
+    letter-spacing: -0.01em;
+  }
+  .lede {
+    font-family: var(--hand); font-weight: 300;
+    font-size: 19px;
+    line-height: 1.45; max-width: 780px; margin: 0 0 20px;
+  }
+  .cols {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 48px 64px;
+  }
+  .cols h3 {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em;
+    text-transform: uppercase; margin: 0 0 12px; opacity: 0.7;
+  }
+  .cols p, .cols ul { font-size: 16px; line-height: 1.65; margin: 0 0 12px; }
+  .cols ul { padding-left: 18px; }
+  .cols ul li { margin-bottom: 6px; }
+  .cols a { color: var(--ink); text-decoration: underline; text-decoration-color: rgba(242,208,39,0.5); text-underline-offset: 3px; }
+  .lede a { color: var(--ink); text-decoration: underline; text-decoration-color: rgba(242,208,39,0.5); text-underline-offset: 3px; }
+  .lede strong a, .lede a strong { color: var(--ink); }
+
+  @media (max-width: 720px) {
+    .cols { grid-template-columns: 1fr; gap: 40px; }
+    .about { padding: 56px 24px 96px; }
+  }
+
+  /* two-column split: prose on left, agency list on right */
+  .about-split {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+  .about-split .agencies h3 {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: #fff; margin: 0 0 16px;
+  }
+  .about-split .agencies ul {
+    list-style: none; padding: 0; margin: 0;
+    font-size: 16px; line-height: 1.75;
+  }
+  .about-split .agencies li { padding: 4px 0; }
+  @media (max-width: 860px) {
+    .about-split { grid-template-columns: 1fr; gap: 48px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="strip">
+  <div class="sub">
+    <span class="left" style="font-size: 14px; font-family: &quot;Roboto Mono&quot;, ui-monospace, monospace; margin: 0;">CHESTON KWAN</span>
+    <span class="right"><a href="Hero Animation v11.html#portfolio" style="font-size: 14px; font-family: &quot;Roboto Mono&quot;, ui-monospace, monospace;">← BACK TO WORK</a></span>
+  </div>
+</div>
+
+<section class="about-hero">
+  <div class="portrait-col">
+    <div class="img"></div>
+  </div>
+  <div class="headline">
+    <h1>About<br/>Cheston</h1>
+  </div>
+</section>
+
+<main class="about">
+  <div class="kicker">Freelance Art Director</div>
+  <div class="about-split">
+    <div class="prose">
+      <p class="lede">
+        I’m an Advertising Art Director working in the delicate science of convincing—convincing eyeballs to care, clients to take the leap, and ideas to resonate.
+      </p>
+      <p class="lede">
+        I’ve worked on Super Bowl ads, iconic film franchises, and everything from scrappy social to full brand campaigns across film, social, and digital— crafting visual systems, selling lines, building pitches, and pushing ideas until they shine.
+      </p>
+      <p class="lede">
+        I’m still convinced the best ideas win the day. And somehow, I’m still convincing myself creativity is a career path, not a personality disorder.
+      </p>
+      <p class="lede">
+        If I’ve convinced you too, drop me a line at <strong><a href="mailto:ChestonK@gmail.com">ChestonK@gmail.com</a></strong> or <strong><a href="#">LinkedIn</a></strong>
+      </p>
+    </div>
+
+    <aside class="agencies">
+      <h3>Where I've freelanced</h3>
+      <ul>
+        <li>TBWA Chiat Day LA</li>
+        <li>Deutsch</li>
+        <li>180 LA</li>
+        <li>Mother LA</li>
+        <li>GUT LA</li>
+        <li>Partyland</li>
+        <li>RPA</li>
+        <li>Giant Spoon</li>
+        <li>Phenomenon</li>
+        <li>Humanaut</li>
+        <li>Wonderful Agency</li>
+        <li>The Cooler</li>
+        <li>Burns Group</li>
+      </ul>
+    </aside>
+  </div>
+</main>
+
+<script>
+  // marquee
+  const bolt = `<svg class="bolt" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 L4 14 h7 L10 22 l9-12 h-7 z"/></svg>`;
+  const el = document.getElementById("marquee");
+  if (el) {
+    let items = "";
+    for (let i = 0; i < 18; i++) items += `<span class="item">ART DIRECTOR ${bolt}</span>`;
+    el.innerHTML = items;
+  }
+</script>
+
+</body>
+</html>

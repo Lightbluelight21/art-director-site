@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Case Study — Cheston Kwan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Zalando+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #f2d027;
+    --paper: #000;
+    --hand: "DM Sans", system-ui, sans-serif;
+    --title: "Zalando Sans", system-ui, sans-serif;
+    --mono: "Roboto Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: #fff; min-height: 100vh; }
+  body { font-family: var(--hand); }
+
+  /* Header strip (shared) */
+  .strip { border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; background: #000; overflow: hidden; }
+  .sub {
+    padding: 25px 24px;
+    display: flex; justify-content: space-between; align-items: center; font-family: var(--mono);
+    font-size: 24px; letter-spacing: 0.14em; text-transform: uppercase; color: #fff;
+  }
+  .sub a { color: #fff; text-decoration: none; transition: color .2s ease; }
+  .sub a:hover { color: var(--ink); }
+
+  /* Case layout: centered, wall-to-wall videos */
+  .case { padding: 64px 0 96px; }
+  .case-head {
+    max-width: 880px;
+    margin: 0 auto 56px;
+    padding: 0 32px;
+    text-align: center;
+  }
+  .kicker {
+    font-family: var(--mono); font-size: 14px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--ink); margin-bottom: 20px;
+  }
+  h1.title {
+    font-family: var(--mono); font-weight: 600;
+    font-size: clamp(40px, 5vw, 80px);
+    line-height: 1.0; letter-spacing: -0.01em;
+    color: #fff; margin: 0 0 28px;
+    text-transform: uppercase;
+  }
+  .blurb-wrap {
+    margin: 0 auto; max-width: 720px;
+    text-align: center;
+  }
+  p.blurb {
+    font-family: var(--hand); font-weight: 300;
+    font-size: 17px; line-height: 1.55;
+    color: rgba(255,255,255,0.9);
+    margin: 0 0 18px;
+  }
+  .recognition {
+    margin: 80px auto 0;
+    max-width: 960px;
+    padding: 0 32px;
+    text-align: center;
+    font-family: var(--hand); font-weight: 300;
+    font-size: 16px; line-height: 1.8;
+    color: rgba(255,255,255,0.85);
+  }
+  .recognition .rlabel {
+    font-weight: 600;
+    color: #fff;
+  }
+  .recognition p { margin: 0 0 6px; }
+
+  /* Stacked wall-to-wall video reel */
+  .reel {
+    display: flex; flex-direction: column;
+    gap: 64px;
+    margin: 0;
+    padding: 0;
+  }
+  .video {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #0a0a0a;
+    cursor: pointer;
+  }
+  .video .poster {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    transition: filter .3s ease, transform .6s ease;
+  }
+  .video::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.35) 100%);
+    pointer-events: none;
+  }
+  .video .play {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    font-family: "Roboto Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: 0.32em;
+    color: #fff;
+    text-shadow: 0 2px 18px rgba(0,0,0,0.45);
+    text-transform: uppercase;
+    transition: transform .25s ease, letter-spacing .25s ease, color .25s ease;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .video:hover .play { transform: translate(-50%,-50%) scale(1.06); letter-spacing: 0.38em; color: #f2d027; }
+  .video:hover .poster { filter: brightness(0.55); transform: scale(1.015); }
+  .video.playing .poster,
+  .video.playing .play,
+  .video.playing::after { display: none; }
+  .video .v-label {
+    position: absolute; left: 0; bottom: 0;
+    padding: 16px 20px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: #fff; z-index: 2;
+  }
+  .video .v-dur {
+    position: absolute; right: 0; bottom: 0;
+    padding: 16px 20px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.16em;
+    color: #fff; z-index: 2;
+  }
+
+  /* Credits — centered */
+  .credits {
+    max-width: 720px;
+    margin: 96px auto 0;
+    padding: 48px 32px 0;
+    text-align: center;
+    border-top: 1px dashed rgba(242,208,39,0.35);
+  }
+  .credits h2 {
+    font-family: var(--mono); font-weight: 600;
+    font-size: 12px; letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink); margin: 0 0 24px;
+  }
+  .credits ul {
+    list-style: none; padding: 0; margin: 0;
+    font-family: var(--hand); font-weight: 300;
+    font-size: 16px; line-height: 1.8;
+    color: rgba(255,255,255,0.85);
+  }
+  .credits li { padding: 4px 0; }
+  .credits li b {
+    font-family: var(--mono); font-weight: 500;
+    font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-right: 10px;
+  }
+
+  /* Next project */
+  .next-proj {
+    max-width: 1600px;
+    margin: 80px auto 0;
+    padding: 32px 32px 0;
+    display: flex; justify-content: center; align-items: center;
+    gap: 16px;
+    border-top: 1px dashed rgba(242,208,39,0.35);
+    font-family: var(--mono); font-size: 14px; letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .next-proj a { color: #fff; text-decoration: none; transition: color .2s ease; }
+  .next-proj a:hover { color: var(--ink); }
+  .next-proj .next-client {
+    font-family: var(--mono); font-weight: 600;
+    font-size: clamp(24px, 3vw, 40px);
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 860px) {
+    .sub { font-size: 14px; padding: 16px 18px; }
+    h1.title { font-size: clamp(32px, 9vw, 56px); }
+    p.blurb { font-size: 17px; }
+    .reel { gap: 40px; }
+    .video .play { font-size: 20px; letter-spacing: 0.28em; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="strip">
+  <div class="sub">
+    <span class="left"><a href="../Hero Animation v11.html#portfolio" style="font-size: 14px;">← BACK TO WORK</a></span>
+    <span class="right"><a href="../about.html" style="font-size: 14px;">ABOUT ME</a></span>
+  </div>
+</div>
+
+<main class="case">
+  <!-- Top: title + blurb, centered -->
+  <header class="case-head">
+    <div class="kicker" id="caseKicker" style="display:none;">Campaign</div>
+    <h1 class="title" id="caseTitle">Project Title</h1>
+    <div class="blurb-wrap" id="blurbWrap"></div>
+  </header>
+
+  <!-- Middle: 3 stacked wall-to-wall videos -->
+  <div class="reel" id="reel"></div>
+
+  <!-- Recognition (below video, above credits) -->
+  <section class="recognition" id="recognition"></section>
+
+  <!-- Bottom: agency credits, centered -->
+  <section class="credits">
+    <h2>Credits</h2>
+    <ul id="creditsList"></ul>
+  </section>
+
+  <!-- Next -->
+  <div class="next-proj">
+    <span>Next Project</span>
+    <a href="#" id="nextLink"><span class="next-client" id="nextClient">—</span> →</a>
+  </div>
+</main>
+
+<script>
+  const PROJECTS = [
+    { n: "01", client: "BLADE RUNNER 2049",          title: "",                    type: "Film",             year: "2023" },
+    { n: "02", client: "ALIEN",                      title: "Rick and Morty",      type: "Brand x IP",       year: "2024" },
+    { n: "03", client: "TACO BELL",                  title: "Super Bowl",          type: "Campaign",         year: "2024" },
+    { n: "04", client: "DR PEPPER",                  title: "",                    type: "Commercial",       year: "2023" },
+    { n: "05", client: "HONDA",                      title: "",                    type: "Commercial",       year: "2023" },
+    { n: "06", client: "DIRECTV",                    title: "",                    type: "Campaign",         year: "2022" },
+    { n: "07", client: "ALIEN",                      title: "Audi",               type: "Brand x IP",       year: "2024" },
+    { n: "08", client: "BEHR",                       title: "",                    type: "Commercial",       year: "2022" },
+    { n: "09", client: "ADIDAS",                     title: "",                    type: "Commercial",       year: "2023" },
+    { n: "10", client: "McDONALD\u2019S",            title: "",                    type: "Commercial",       year: "2022" },
+    { n: "11", client: "TACO BELL",                  title: "Secret Product",      type: "Campaign",         year: "2023" },
+    { n: "12", client: "TACO BELL",                  title: "",                    type: "Commercial",       year: "2022" },
+    { n: "13", client: "FARMERS INSURANCE",          title: "",                    type: "Commercial",       year: "2021" },
+    { n: "14", client: "TACO BELL",                  title: "Twitch",              type: "Brand x Platform", year: "2023" },
+    { n: "15", client: "FARMERS INSURANCE",          title: "Digital Shorts",      type: "Digital",          year: "2022" },
+    { n: "16", client: "JACK IN THE BOX",            title: "",                    type: "Commercial",       year: "2022" },
+    { n: "17", client: "EXPERIAN",                   title: "",                    type: "Commercial",       year: "2021" },
+    { n: "18", client: "LOWE\u2019S",                title: "",                    type: "Commercial",       year: "2022" },
+    { n: "19", client: "ALIEN",                      title: "GoPro",              type: "Brand x IP",       year: "2024" }
+  ];
+  const GIF_OVERRIDES = { "07": "../gifs/07-v2.gif", "19": "../gifs/19-v2.gif" };
+  PROJECTS.forEach(p => { p.gif = GIF_OVERRIDES[p.n] || `../gifs/${p.n}.gif`; });
+
+  const params = new URLSearchParams(location.search);
+  const n = params.get("n") || "01";
+  const p = PROJECTS.find(x => x.n === n) || PROJECTS[0];
+  const idx = PROJECTS.indexOf(p);
+  const next = PROJECTS[(idx + 1) % PROJECTS.length];
+
+  // Per-project content overrides (blurb, recognition, credits)
+  const DETAILS = {
+    "01": {
+      kicker: "Short Film",
+      blurb: [
+        `<em>Blade Runner 2049</em> is set thirty years after the original film, leaving a sizable distance in story that needed to be addressed. Our challenge was to bridge this gap and introduce central characters and events to filmgoers in advance of the new film’s theatrical release.`,
+        `We created an action-packed prologue short film that introduces Dave Bautista as an outlaw Nexus replicant and kickstarts the events of the film.`
+      ],
+      recognition: [
+        { src: "Esquire",  quote: "If this is any indication, Blade Runner 2049 is going to be some high-brow sci-fi," },
+        { src: "Collider", quote: "More of this, please" },
+        { src: "Polygon",  quote: "… Bautista finally gets his chance to demonstrate what he’s capable of." }
+      ],
+      credits: [
+        { role: "Creative Team",     name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Director", name: "Chris Eyerman" },
+        { role: "Director",          name: "Luke Scott" }
+      ]
+    },
+    "02": {
+      blurb: [
+        `We pitched the filmmakers of <em>Alien: Covenant</em> on a partnership with a science fiction property that is <em>slightly</em> different in tone. We worked with the insane geniuses behind Adult Swim’s monster hit <em>Rick and Morty</em> to create this branded short. It even aired on Adult Swim much to the surprise of the show’s fans who were rabidly awaiting the show’s season 3 premiere.`
+      ],
+      recognition: [
+        { src: "Clio Award", note: "Silver" },
+        { src: "Fast Company", href: "https://www.fastcompany.com/40421525/rick-and-morty-did-a-crossover-with-alien-covenant-and-its-perfect", quote: "The Best 45 seconds of Branded Content you’re likely to see this year." },
+        { src: "Nerdist", href: "https://nerdist.com/rick-and-morty-enter-alien-covenant-in-a-semi-official-crossover/", quote: "This may be sponsored content, but we’ll happily declare it to be canon within the Rick and Mortyverse" },
+        { src: "Collider", href: "http://collider.com/alien-covenant-rick-and-morty-video/", quote: "Hopefully this brief clip is the start of a trend." },
+        { src: "Reddit", href: "https://www.reddit.com/r/videos/comments/6azaru/rick_and_morty_alien_covenant/", note: "3.5K+ upvotes, organic" }
+      ],
+      credits: [
+        { role: "Creative Team",      name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Director",  name: "Chris Eyerman" }
+      ]
+    },
+    "03": {
+      blurb: [
+        `<em>Taco Bell</em> wanted to launch their latest product as the biggest thing in history, so we decided to take them at their word. We launched the Quesalupa on television’s biggest stage with a spot promising audiences that their most cherished cultural touchpoints are nothing compared to what Taco Bell had in store.`
+      ],
+      recognition: [
+        { src: "MIXX Award", note: "Silver" },
+        { src: "Creativity-Online", note: "Editor’s Pick" },
+        { src: "Effie Award", note: "Bronze" },
+        { src: "ThinkLA Award", note: "Campaign of the Year, Finalist" },
+        { src: "Webby", note: "Best Integrated Campaign Honoree" }
+      ],
+      credits: [
+        { role: "Creative Team",      name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Directors", name: "Ryan Lehr, Guto Araki, Nathan Dills" },
+        { role: "Director",           name: "Saman Kesh" }
+      ]
+    },
+    "04": {
+      blurb: [
+        `Dr Pepper fans don’t casually “like” a flavor. They defend it. Loudly. Every distinct blend has its own die hard fan club ready to argue why theirs is the superior sip. So instead of stepping in and picking a favorite, we let them fight it out.`
+      ],
+      credits: [
+        { role: "Creative Team",       name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Directors",  name: "Curtis Petraglia & Andrew Kong" },
+        { role: "Directors",           name: "Mister (Miche Sieg & Rose Chirillo)" }
+      ]
+    },
+    "05": {
+      blurb: [
+        `Every year, Honda gives a couple of random people the chance to go for a ride in an F1 car with racing legend Mario Andretti. It’s an insanely cool prize, and we wanted to make sure fans understood exactly how cool it is.`
+      ],
+      credits: [
+        { role: "Creative Team", name: "Cheston Kwan & Josh Hill" },
+        { role: "ECD",           name: "Jason Sperling" },
+        { role: "Director",      name: "Peter Martin" }
+      ]
+    },
+    "06": {
+      blurb: [
+        `We pitched ideas for fun DirecTV spots — here are a few that found their way on air.`
+      ],
+      credits: [
+        { role: "Creative Team",       name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Directors",  name: "Ryan Buckley & Mark Winters" },
+        { role: "Creative Director",   name: "Josh Dimarcantonio" },
+        { role: "ECD",                 name: "Jason Karley" },
+        { role: "Directors",           name: "Jody Hill & Jake Szymanski" }
+      ]
+    },
+    "07": {
+      blurb: [
+        `In the near future, <strong>Audi</strong> will send it’s Lunar Rover to the moon to conduct important scientific research. We created this horror piece to show that the rover can handle whatever threats might be waiting out there.`
+      ],
+      recognition: [
+        { src: "Creativity", quote: "A clever integration of the brand and smart way to promote Audi’s own initiatives in space engineering." }
+      ],
+      results: [
+        "6m+ views",
+        "Covered by 186+ press outlets",
+        `<a href="#" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(242,208,39,0.5);text-underline-offset:3px">Editor’s Pick, Creativity-Online</a>`
+      ],
+      credits: [
+        { role: "Creative Team",      name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Director",  name: "Chris Eyerman" },
+        { role: "Director",           name: "Matthew Thorne" }
+      ]
+    },
+    "08": {
+      blurb: [
+        `Every new homeowner knows the feeling of walking around their brand new castle and thinking, “What the hell were the old owners thinking.” This campaign was our way of giving people permission to exorcise the ghosts of past homeowners, and make their living spaces their own.`
+      ],
+      credits: [
+        { role: "Freelance Creative Team", name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Team",           name: "Stew Tribe & Dan Hales" },
+        { role: "Creative Directors",      name: "Bert Marissen & Jeff O’Keefe" },
+        { role: "ECD",                     name: "Jason Karley" },
+        { role: "Director",                name: "Benji Weinstein" }
+      ]
+    },
+    "09": {
+      blurb: [
+        `We launched a back-to-school campaign featuring top college football recruit Jeremiah Smith and award-winning pro soccer player Trinity Rodman. The work celebrated fresh starts on and off the field under the tagline <em>“New Year, New You.”</em>`
+      ],
+      credits: [
+        { role: "Creative Team", name: "Cheston Kwan & Josh Hill" },
+        { role: "ECD",           name: "Mike Bokman" },
+        { role: "CCO",           name: "JD Jurentkuff" },
+        { role: "Director",      name: "Anthony Pham" }
+      ]
+    },
+    "10": {
+      blurb: [
+        `If breakfast is really the most important meal of the day, why are you eating, like, a mushed up banana, or a pop tart or something called S O Y L E N T? This spot is a rallying cry to the breakfast eating public that the time has come for them to take back their rightful place at the breakfast table. In other words, it’s time to eat a dang McMuffin.`
+      ],
+      credits: [
+        { role: "Freelance Creative Team", name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Team",           name: "Elizabeth Daniel & Blair Seward" },
+        { role: "Creative Directors",      name: "Chris Juhas & Ben Tolbert" },
+        { role: "Director",                name: "Malcolm Venville" }
+      ]
+    },
+    "11": {
+      blurb: [
+        `<em>Taco Bell</em> was launching the ████████, its biggest product ever — but they didn’t want audiences to know what it was until the Super Bowl. So how do you hype something up if you can’t reveal what it is? We created a teaser campaign that leaned into that tension featuring confused celebrity talent, inviting audiences to preorder the █████████ even though they didn’t even know what the █████████ was.`
+      ],
+      credits: [
+        { role: "Creative Team",      name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Directors", name: "Andy Pearson & Ken Slater" },
+        { role: "Creative Directors", name: "Ryan Lehr, Nathan Dills" }
+      ]
+    },
+    "12": {
+      blurb: [
+        `Taco Bell work that spans it all, from Outkast vibes to Woolly Mammoth resurrections.`
+      ],
+      credits: [
+        { role: "Creative Team",      name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Directors", name: "Andy Pearson & Ken Slater" },
+        { role: "Director",           name: "Dave Ladin" }
+      ]
+    },
+    "13": {
+      blurb: [
+        `The wildly successful University of Farmers campaign for <em>Farmers Insurance</em> is a pretty fun playground for creatives to work in. Every spot is a collection of arresting scenarios, built around JK Simmons, one of the most iconic character actors in the business.`
+      ],
+      credits: [
+        { role: "Creative Team",      name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Directors", name: "Perrin Anderson, Hobart Birmingham" },
+        { role: "Creative Directors", name: "Tom Hamling, Laura Hauseman" },
+        { role: "Directors",          name: "David Shane, Craig Gillespie, Fred Savage" }
+      ]
+    },
+    "14": {
+      blurb: [
+        `To highlight the absurdity of the internet’s bacon obsession (and launch Taco Bell’s Bacon Chalupa) we recruited a trio of popular Twitch streamers to play through a level of Counter Strike: Global Offensive in which everything was bacon. They say war is hell, but a war in which everything is covered in Bacon is like, double hell.`
+      ],
+      credits: [
+        { role: "Creative Team",      name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Directors", name: "Andy Pearson & Ken Slater" }
+      ]
+    },
+    "15": {
+      blurb: [
+        `<em>Farmers Insurance</em> wanted to educate customers about some ways to keep their property safer, but they didn’t want to bore people. Our solution: keep it short, and keep it weird. We created a site featuring funny, informative videos to teach customers some important information.`
+      ],
+      recognition: [
+        { src: "American Advertising Awards", note: "Gold" },
+        { src: "Webby Awards", note: "Honoree" },
+        { src: "Creativity Online", note: "Featured" }
+      ],
+      credits: [
+        { role: "Creative Team",     name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Director", name: "Tom Hamling" },
+        { role: "Directors",         name: "PJ Richardson & Tony Liu" }
+      ]
+    },
+    "16": {
+      blurb: [
+        `Truly an honor to tack a few more questionable gems onto the shrine of Jack in the Box advertising.`
+      ],
+      credits: [
+        { role: "Creative Team",      name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Directors", name: "Mark Bielik & Juan Davila Morris" },
+        { role: "ECD",                name: "Jason Karley" },
+        { role: "Director",           name: "Matt Dillmore" }
+      ]
+    },
+    "17": {
+      blurb: [
+        `John Cena. Muscles. Mayhem. He’s punching through walls to take out bad guys — and somehow, it’s also about credit scores.`
+      ],
+      credits: [
+        { role: "Creative Team",     name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Director", name: "Todd Miller" }
+      ]
+    },
+    "18": {
+      blurb: [
+        `This spot reimagines the iconic Lowe’s home logo as jobsite materials and objects — reinforcing that Lowe’s is the new home for Pros. Each transformation is a visual metaphor brought to life through bold design and motion.`
+      ],
+      credits: [
+        { role: "Creative Team",      name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Directors", name: "Curtis Petraglia & Evan Brown" },
+        { role: "ECD",                name: "Sorenne Gottlieb" },
+        { role: "Production",         name: "Logan" }
+      ]
+    },
+    "19": {
+      blurb: [
+        `We worked with <strong>GoPro</strong> to develop these short, content pieces — capturing the final messages of the doomed Covenant crew. The pieces introduce audiences to some of the film’s central characters, while hinting at the grisly fate that awaits them. They also help demonstrate that GoPro’s cameras are versatile enough to document both your most intimate moments, and your untimely demise at the hands of a Xenomorph.`
+      ],
+      credits: [
+        { role: "Creative Team",      name: "Cheston Kwan & Josh Hill" },
+        { role: "Creative Director",  name: "Chris Eyerman" },
+        { role: "Director",           name: "Luke Scott" }
+      ]
+    }
+  };
+  const detail = DETAILS[p.n] || {};
+
+  // Populate head
+  const fullTitle = p.client + (p.title ? " — " + p.title : "");
+  document.title = `${fullTitle} · Cheston Kwan`;
+  document.getElementById("caseKicker").textContent = detail.kicker || [p.type, p.year].filter(Boolean).join(" · ");
+  document.getElementById("caseTitle").textContent = fullTitle;
+  const blurbs = detail.blurb || [`A short positioning line for ${fullTitle} — describe the ambition of the work and the insight that cracked it open.`];
+  document.getElementById("blurbWrap").innerHTML = blurbs.map(b => `<p class="blurb">${b}</p>`).join("");
+  if (detail.recognition && detail.recognition.length) {
+    const lines = detail.recognition.map(r => {
+      const src = r.href ? `<a href="${r.href}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:rgba(242,208,39,0.5);text-underline-offset:3px">${r.src}</a>` : r.src;
+      if (r.quote) return `<p><span class="rlabel">${src}:</span> “${r.quote}”</p>`;
+      return `<p><span class="rlabel">${src}:</span> ${r.note || ""}</p>`;
+    }).join("");
+    document.getElementById("recognition").innerHTML = `<p><span class="rlabel">Recognition:</span></p>${lines}`;
+  }
+  if (detail.results && detail.results.length) {
+    const items = detail.results.map(r => `<li>${r}</li>`).join("");
+    const resultsBlock = `<p style="margin-top:14px"><span class="rlabel">Results:</span></p><ul style="margin:4px 0 0;padding-left:1.1em;line-height:1.6">${items}</ul>`;
+    document.getElementById("recognition").insertAdjacentHTML("beforeend", resultsBlock);
+  }
+
+  // Map project n -> array of Vimeo video IDs (one or many)
+  const projectEmbeds = {
+    "01": ["237825792"],
+    "02": ["237835360"],
+    "03": ["237992483", "246382187"],
+    "04": ["1169401613", "1169402063", "1169403714", "1169403102", "1169402543"],
+    "05": ["1102855389"],
+    "06": ["815469402", "765145060", "782737517"],
+    "07": ["215055182"],
+    "08": ["708023783", "696263729"],
+    "09": ["1106636546", "1120857970"],
+    "10": ["336909143", "360066070"],
+    "11": ["237989611", "237989674"],
+    "12": ["237992035", "204444636"],
+    "13": ["1102773696", "237995195", "237995196", "237995817", "237995810", "237994835"],
+    "14": ["141120375"],
+    "15": ["237950522", "237950418", "237950283", "237950337", "237950267"],
+    "16": ["771379640", "770019225"],
+    "17": ["1131658177"],
+    "18": ["1102879864"],
+    "19": ["216258963", "213930828", "237963456"]
+  };
+  const embedIds = projectEmbeds[p.n];
+  if (embedIds && embedIds.length) {
+    // Each video is a click-to-play poster. We use Vimeo's official
+    // thumbnail (via vumbnail.com) as the static still and overlay the
+    // word PLAY in white. On click, we swap the poster for the iframe
+    // with autoplay=1 so playback starts in the same gesture.
+    document.getElementById("reel").innerHTML = embedIds.map(id => `
+      <div class="video embed" data-vimeo-id="${id}">
+        <div class="poster" style="background-image:url('https://vumbnail.com/${id}_large.jpg');"></div>
+        <div class="play">Play</div>
+      </div>`).join("");
+
+    document.querySelectorAll('.video.embed').forEach(box => {
+      box.addEventListener('click', () => {
+        if (box.classList.contains('playing')) return;
+        const id = box.dataset.vimeoId;
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://player.vimeo.com/video/${id}?autoplay=1&badge=0&autopause=0&player_id=0&app_id=58479`;
+        iframe.frameBorder = 0;
+        iframe.allow = 'autoplay; fullscreen; picture-in-picture; clipboard-write';
+        iframe.allowFullscreen = true;
+        iframe.title = 'Video';
+        iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;';
+        box.appendChild(iframe);
+        box.classList.add('playing');
+      });
+    });
+  } else {
+    // Fallback — GIF poster with PLAY affordance (matches embed look)
+    document.getElementById("reel").innerHTML = `
+      <div class="video">
+        <div class="poster" style="background-image:url('${p.gif}')"></div>
+        <div class="play">Play</div>
+      </div>`;
+  }
+
+  // Credits
+  const credits = detail.credits || [
+    { role: "Client",        name: p.client },
+    { role: "Agency",        name: "Studio Confidential" },
+    { role: "ECD",           name: "Someone Senior" },
+    { role: "CD",            name: "Someone Else" },
+    { role: "Art Director",  name: "Cheston Kwan" },
+    { role: "Director",      name: "A. Director" },
+    { role: "DP",            name: "B. Shooter" },
+    { role: "Editor",        name: "C. Cutter" },
+    { role: "Year",          name: p.year || "—" },
+  ];
+  document.getElementById("creditsList").innerHTML =
+    credits.map(c => `<li><b>${c.role}</b> ${c.name}</li>`).join("");
+
+  // Next
+  document.getElementById("nextLink").href = `case.html?n=${next.n}`;
+  document.getElementById("nextClient").textContent = next.client + (next.title ? " — " + next.title : "");
+</script>
+
+</body>
+</html>
